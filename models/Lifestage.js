@@ -11,9 +11,7 @@ const LifestageSchema = new Schema({
     title: {
         type: String
     },
-    description: {
-        type: String
-    },
+    description: [String],
     soft_skills: [String],
     hard_skills: [String],
     achievements: [String],

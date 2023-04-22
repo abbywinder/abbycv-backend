@@ -1,6 +1,9 @@
 from decouple import config
 import docx2txt
 import re
+from mongo_config import db
+from datetime import datetime
+
 
 path = config('CV_FILE_PATH')
 doc_content = docx2txt.process(path)
@@ -15,6 +18,8 @@ for paragraph in paragraphs:
     if re.match('(19|20)\d{2}',paragraph[0:4]):
         lifestages.append({
             'title': paragraph,
+            'date_start': datetime.strptime(fr"{paragraph[0:4]}-1-1T10:53:53.000Z", "%Y-%m-%dT%H:%M:%S.000Z"),
+            'date_end': datetime.strptime(fr"{paragraph[5:9]}-1-1T10:53:53.000Z", "%Y-%m-%dT%H:%M:%S.000Z"),
             'description': [],
             'soft_skills': [],
             'hard_skills': [],
@@ -26,3 +31,8 @@ for paragraph in paragraphs:
     else:
         if latest_key and paragraph:
             lifestages[latest_lifestage_index][latest_key].append(paragraph)
+
+
+collection = db['lifestages']
+for lifestage in lifestages:
+    collection.update_one({'title': lifestage['title']}, {'$set': lifestage}, upsert=True)
