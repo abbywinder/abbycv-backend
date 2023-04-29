@@ -4,7 +4,7 @@ const Lifestage = require('../models/Lifestage');
 
 const getAllLifestages = async (req, res) => {
     try {
-        const data = await Lifestage.find({});
+        const data = await Lifestage.find(req.query);
         if (data.length) return res.status(200).send(data);
         else return res.status(404).send('No data found');
     } catch (err) {
@@ -25,19 +25,20 @@ const getOneLifestage = async (req, res) => {
 // POST
 
 const createNewLifestage = async (req, res) => {
-    const newLifestage = new Lifestage ({
-        date_start: req.body.date_start,
-        date_end: req.body.date_end,
-        title: req.body.title,
-        description: req.body.description,
-        soft_skills: req.body.soft_skills,
-        hard_skills: req.body.hard_skills,
-        achievements: req.body.achievements
-    });
-    
     try {
-        newLifestage.save()
-        .then(data => res.status(201).send(data));
+        const newLifestage = new Lifestage ({
+            date_start: req.body.date_start,
+            date_end: req.body.date_end,
+            title: req.body.title,
+            description: req.body.description,
+            soft_skills: req.body.soft_skills,
+            hard_skills: req.body.hard_skills,
+            achievements: req.body.achievements,
+            type: req.body.type
+        });
+    
+        const data = await newLifestage.save();
+        return res.status(201).send(data);
     } catch (err) {
         return res.status(500).send(err.message);
     };  
@@ -47,17 +48,18 @@ const createNewLifestage = async (req, res) => {
 // PUT
 
 const updateLifestage = async (req, res) => {
-    const newData = {
-        date_start: req.body.date_start,
-        date_end: req.body.date_end,
-        title: req.body.title,
-        description: req.body.description,
-        soft_skills: req.body.soft_skills,
-        hard_skills: req.body.hard_skills,
-        achievements: req.body.achievements
-    };
-    
     try {
+        const newData = {
+            date_start: req.body.date_start,
+            date_end: req.body.date_end,
+            title: req.body.title,
+            description: req.body.description,
+            soft_skills: req.body.soft_skills,
+            hard_skills: req.body.hard_skills,
+            achievements: req.body.achievements,
+            type: req.body.type
+        };
+    
         const updatedData = await Lifestage.findByIdAndUpdate(req.params.id, newData, { new: true });
         if (updatedData) return res.status(200).send(updatedData);
         else return res.status(404).send('Nothing found matching that ID');
@@ -70,14 +72,13 @@ const updateLifestage = async (req, res) => {
 // PATCH
 
 const patchById = async (req, res) => {
-
-    let updatedData;
-    if (req.body.op === 'replace') updatedData = await Lifestage.updateOne({ _id: req.params.id }, { $set: { [req.body.path]: req.body.value } });
-    else if (req.body.op === 'add') updatedData = await Lifestage.updateOne({ _id: req.params.id }, { $push: { [req.body.path]: req.body.value } });
-    else if (req.body.op === 'remove') updatedData = await Lifestage.updateOne({ _id: req.params.id }, { $pull: { [req.body.path]: req.body.value } });
-    else if (req.body.op === 'increment') updatedData = await Lifestage.updateOne({ _id: req.params.id }, { $inc: { [req.body.path]: req.body.value } });
-    
     try {
+        let updatedData;
+        if (req.body.op === 'replace') updatedData = await Lifestage.updateOne({ _id: req.params.id }, { $set: { [req.body.path]: req.body.value } });
+        else if (req.body.op === 'add') updatedData = await Lifestage.updateOne({ _id: req.params.id }, { $push: { [req.body.path]: req.body.value } });
+        else if (req.body.op === 'remove') updatedData = await Lifestage.updateOne({ _id: req.params.id }, { $pull: { [req.body.path]: req.body.value } });
+        else if (req.body.op === 'increment') updatedData = await Lifestage.updateOne({ _id: req.params.id }, { $inc: { [req.body.path]: req.body.value } });
+    
         if (updatedData) return res.status(200).send(updatedData);
         else return res.status(404).send('No match found for that operation');
     } catch (err) {

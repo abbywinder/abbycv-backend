@@ -1,6 +1,5 @@
 import unittest
 import cv_document_parse
-import docx2txt
 from mongo_config import db
 from datetime import date
 

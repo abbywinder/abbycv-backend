@@ -1,5 +1,12 @@
+const request = require('supertest');
+const app = require('./app');
+
 describe('Server', () => {
-    test('No user sensitive or identifying data should be stored on the user\'s browser in session data or cookies', () => {
+    it('Should not store user sensitive or identifying data on the user\'s browser in session data or cookies', () => {
+
+    });
+
+    it('Should block any potential injection attacks by escaping text and blocking chars', () => {
 
     });
 });
