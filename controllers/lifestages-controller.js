@@ -1,10 +1,12 @@
 const Lifestage = require('../models/Lifestage');
+const { generateSortPipeline } = require('../pipelines/lifestage-pipelines');
 
 // GET
 
 const getAllLifestages = async (req, res) => {
     try {
-        const data = await Lifestage.find(req.query);
+        const pipeline = generateSortPipeline(req.query);
+        const data = await Lifestage.aggregate(pipeline);
         if (data.length) return res.status(200).send(data);
         else return res.status(404).send('No data found');
     } catch (err) {
@@ -89,6 +91,20 @@ const patchById = async (req, res) => {
 
 // DELETE
 
+const deleteByQuery = async (req, res) => {
+    try {
+        if (Object.keys(req.query).length) {
+            const data = await Lifestage.deleteMany(req.query);
+            if (data.deletedCount) return res.status(200).send(data);
+            else return res.status(404).send('No matching item found');
+        } else {
+            throw Error('You are not permitted to delete all documents');
+        };
+    } catch (err) {
+        return res.status(500).send(err.message);
+    };
+};
+
 const deleteById = async (req, res) => {
     try {
         const data = await Lifestage.findByIdAndDelete(req.params.id);
@@ -105,5 +121,6 @@ module.exports = {
     createNewLifestage: createNewLifestage,
     updateLifestage: updateLifestage,
     patchById: patchById,
-    deleteById: deleteById
+    deleteById: deleteById,
+    deleteByQuery: deleteByQuery
 };
