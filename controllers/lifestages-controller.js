@@ -1,11 +1,11 @@
 const Lifestage = require('../models/Lifestage');
-const { generateSortPipeline } = require('../pipelines/lifestage-pipelines');
+const { generateFetchPipeline } = require('../pipelines/lifestage-pipelines');
 
 // GET
 
 const getAllLifestages = async (req, res) => {
     try {
-        const pipeline = generateSortPipeline(req.query);
+        const pipeline = generateFetchPipeline(req.query);
         const data = await Lifestage.aggregate(pipeline);
         if (data.length) return res.status(200).send(data);
         else return res.status(404).send('No data found');

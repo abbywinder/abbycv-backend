@@ -1,6 +1,4 @@
-const sort = query => {
-    const sort = query.sort;
-    delete query['sort'];
+const fetchLifestagesPipeline = query => {
 
     const getSortMethod = sort => {
         switch (sort) {
@@ -17,19 +15,34 @@ const sort = query => {
         }
     };
 
-    const duration = sort && sort.slice(0,8) === 'duration' ? [{
+    const searchStage = query.search ? [{
+        '$search': {
+            index: 'default',
+            text: {
+                query: query.search,
+                path: ['title','description','hard_skills','soft_skills','achievements','date_start','date_end','type']
+            }
+        }
+    }] : [];
+    delete query['search'];
+
+
+    const sort = query.sort;
+    const durationStage = sort && sort.slice(0,8) === 'duration' ? [{
         '$addFields': {
             duration: {
                 $subtract: ['$date_end', '$date_start']
             }
         }
     }] : [];
+    delete query['sort'];
 
     return [
+        ...searchStage,
         {
             '$match': query
         }, 
-        ...duration,
+        ...durationStage,
         {
             '$sort': getSortMethod(sort)
         }, {
@@ -45,5 +58,5 @@ const sort = query => {
 };
 
 module.exports = {
-    generateSortPipeline: sort
+    generateFetchPipeline: fetchLifestagesPipeline
 };
