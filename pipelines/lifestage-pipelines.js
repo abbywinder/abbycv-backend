@@ -15,16 +15,33 @@ const fetchLifestagesPipeline = query => {
         }
     };
 
-    const searchStage = query.search ? [{
-        '$search': {
-            index: 'default',
-            text: {
-                query: query.search,
-                path: ['title','description','hard_skills','soft_skills','achievements','date_start','date_end','type']
-            }
-        }
-    }] : [];
-    delete query['search'];
+    // // search index solution
+    // if (query.search) { 
+    //     query['$search'] = {
+    //         index: 'default',
+    //         text: {
+    //             query: query.search,
+    //             path: ['title','description','hard_skills','soft_skills','achievements','date_start','date_end','type']
+    //         }
+    //     }
+    //     delete query['search'];
+    // };
+
+    // // text index solution
+    // if (query.search) { 
+    //     query['$text'] = {
+    //         $search: query.search,
+    //         $language: 'en'
+    //     } 
+    //     delete query['search'];
+    // };
+
+    // regex match solution - chosen due to search results updating as typed and dataset being small
+    if (query.search) { 
+        const fields = ['title','description','hard_skills','soft_skills','achievements','type'];
+        query['$or'] = fields.map(field => ({ [field]: { $regex: query.search, $options: 'i' } }));
+        delete query['search'];
+    };
 
 
     const sort = query.sort;
@@ -38,7 +55,6 @@ const fetchLifestagesPipeline = query => {
     delete query['sort'];
 
     return [
-        ...searchStage,
         {
             '$match': query
         }, 
