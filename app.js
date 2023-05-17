@@ -1,7 +1,8 @@
 //REQUIRES
 const express = require('express');
 const cors = require('cors');
-const morgan = require('morgan')
+const morgan = require('morgan');
+const qs = require('qs');
 
 const lifestagesRoute = require('./routes/lifestages-route');
 
@@ -12,6 +13,10 @@ const corsOptions = {
     origin: ['http://localhost:3000'],
     optionsSuccessStatus: 200
 };
+
+app.set('query parser', function(str) {
+    return qs.parse(str ? decodeURIComponent(str) : str, {comma: true})
+});
 
 //middleware usage
 app.use(express.json());

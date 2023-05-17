@@ -67,6 +67,18 @@ describe('GET', () => {
             ]
         );
     });
+        
+    it('/api/lifestages/?soft_skills=teamwork => incorrect case call with query returns correct data', async () => {
+        const response = await request(app).get('/api/lifestages/?soft_skills=teamwork').set('Accept', 'application/json');
+        expect(response.headers["content-type"]).toMatch(/json/);
+        expect(response.status).toEqual(200);
+    });
+    
+    it('/api/lifestages/?soft_skills=organisation%2Cteamwork => call with query returns correct data', async () => {
+        const response = await request(app).get('/api/lifestages/?soft_skills=organisation%2Cteamwork').set('Accept', 'application/json');
+        expect(response.headers["content-type"]).toMatch(/json/);
+        expect(response.status).toEqual(200);
+    });
 
     it('/api/lifestages/?type=experience&sort=yeardesc => call with query and sort returns correct data', async () => {
         const response = await request(app).get('/api/lifestages/?type=experience&sort=yeardesc').set('Accept', 'application/json');
@@ -113,8 +125,20 @@ describe('GET', () => {
         return request(app).get('/api/lifestages/999999999999999999999999').expect(404);
     });
 
-    it('/api/lifestages/1/ 500 if ID is not ObjectId', () => {
+    it('/api/lifestages/1 => 500 if ID is not ObjectId', () => {
         return request(app).get('/api/lifestages/1').expect(500);
+    });
+
+    it('/api/lifestages/skills => returns data of length 8', async () => {
+        const response = await request(app).get('/api/lifestages/skills').set('Accept', 'application/json');
+        expect(response.status).toEqual(200);
+        expect(response.body).toEqual(
+            expect.arrayContaining([{
+                _id: expect.any(String),
+                count: expect.any(Number)
+            }])
+        );
+        expect(response.body).toHaveLength(8);
     });
 });
 

@@ -15,6 +15,16 @@ const fetchLifestagesPipeline = query => {
         }
     };
 
+    const sort = query.sort;
+    const durationStage = sort && sort.slice(0,8) === 'duration' ? [{
+        '$addFields': {
+            duration: {
+                $subtract: ['$date_end', '$date_start']
+            }
+        }
+    }] : [];
+    delete query['sort'];
+
     // // search index solution
     // if (query.search) { 
     //     query['$search'] = {
@@ -43,16 +53,12 @@ const fetchLifestagesPipeline = query => {
         delete query['search'];
     };
 
-
-    const sort = query.sort;
-    const durationStage = sort && sort.slice(0,8) === 'duration' ? [{
-        '$addFields': {
-            duration: {
-                $subtract: ['$date_end', '$date_start']
-            }
-        }
-    }] : [];
-    delete query['sort'];
+    Object.keys(query).forEach(key => {
+        if (Array.isArray(query[key]) && key !== '$or') {
+            query['$or'] = query[key].map(e => ({ [key]: e }));
+            delete query[key];
+        };
+    });
 
     return [
         {
@@ -73,6 +79,29 @@ const fetchLifestagesPipeline = query => {
     ];
 };
 
+const fetchSkillsPipeline = () => {
+    return [{
+        $unwind: {
+            path: '$soft_skills',
+            preserveNullAndEmptyArrays: false
+        }
+    }, {
+        $group: {
+            _id: '$soft_skills',
+            count: {
+                $sum: 1
+            }
+        }
+    }, {
+        $sort: {
+            count: -1
+        }
+    }, {
+        $limit: 8
+    }]
+};
+
 module.exports = {
-    generateFetchPipeline: fetchLifestagesPipeline
+    generateFetchPipeline: fetchLifestagesPipeline,
+    fetchSkillsPipeline: fetchSkillsPipeline
 };

@@ -1,12 +1,12 @@
 const Lifestage = require('../models/Lifestage');
-const { generateFetchPipeline } = require('../pipelines/lifestage-pipelines');
+const { generateFetchPipeline, fetchSkillsPipeline } = require('../pipelines/lifestage-pipelines');
 
 // GET
 
 const getAllLifestages = async (req, res) => {
     try {
         const pipeline = generateFetchPipeline(req.query);
-        const data = await Lifestage.aggregate(pipeline);
+        const data = await Lifestage.aggregate(pipeline).collation({ locale: 'en', strength: 2 });
         if (data.length) return res.status(200).send(data);
         else return res.status(404).send('No data found');
     } catch (err) {
@@ -19,6 +19,17 @@ const getOneLifestage = async (req, res) => {
         const data = await Lifestage.findById(req.params.id)
         if (data) return res.status(200).send(data);
         else return res.status(404).send('No data found matching that ID');
+    } catch (err) {
+        return res.status(500).send(err.message);
+    };
+};
+
+const getSkills = async (req, res) => {
+    try {
+        const pipeline = fetchSkillsPipeline();
+        const data = await Lifestage.aggregate(pipeline);
+        if (data.length) return res.status(200).send(data);
+        else return res.status(404).send('No data found');
     } catch (err) {
         return res.status(500).send(err.message);
     };
@@ -118,6 +129,7 @@ const deleteById = async (req, res) => {
 module.exports = {
     getAllLifestages: getAllLifestages,
     getOneLifestage: getOneLifestage,
+    getSkills: getSkills,
     createNewLifestage: createNewLifestage,
     updateLifestage: updateLifestage,
     patchById: patchById,
