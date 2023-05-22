@@ -32,6 +32,9 @@ const LifestageSchema = new Schema({
     achievements: [String],
     type: {
         type: String
+    },
+    background_col: {
+        type: String
     }
 });
 
