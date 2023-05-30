@@ -116,7 +116,8 @@ describe('GET', () => {
                 description: [],
                 soft_skills: [],
                 hard_skills: [],
-                achievements: []
+                achievements: [],
+                background_col: expect.any(String),
             })
         );
     });

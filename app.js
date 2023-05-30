@@ -4,7 +4,9 @@ const cors = require('cors');
 const morgan = require('morgan');
 const qs = require('qs');
 
+
 const lifestagesRoute = require('./routes/lifestages-route');
+const chatRoute = require('./routes/chat-route');
 
 //APP
 const app = express();
@@ -25,5 +27,6 @@ app.use(morgan('dev'));
 
 // ROUTES
 app.use('/api/lifestages', lifestagesRoute);
+app.use('/api/chat', chatRoute);
 
 module.exports = app;
