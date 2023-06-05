@@ -1,9 +1,14 @@
 const request = require('supertest');
 const app = require('../app');
 const { OpenAIApi } = require('openai');
-// const fs = require('fs');
 
-jest.mock('fs', () => ({ createWriteStream: () => ({write: () => null, end: () => null}) }));
+jest.mock('fs', () => ({
+    ...jest.requireActual('fs'),
+    createWriteStream: {
+        write: jest.fn(),
+        end: jest.fn()
+    },
+}));
 
 beforeAll(async () => {
     jest.spyOn(OpenAIApi.prototype, 'createChatCompletion').mockReturnValue({

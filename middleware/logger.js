@@ -1,13 +1,20 @@
-const fs = require('fs');
+const { createWriteStream } = require('fs');
 
-const log = (req, response) => {
-    const latestMessage = req.body.chat[req.body.chat.length - 1].message;
-    const stream = fs.createWriteStream("logs/chats.txt", {flags:'a'});
-    stream.write(`${new Date().toISOString()}\t${req.ip}\t${latestMessage.replaceAll('\n',' ')}\n`);
-    stream.write(`${new Date().toISOString()}\t${req.ip}\t${response.replaceAll('\n',' ')}\n`);
+const logChat = (chat, ip, response) => {
+    const latestMessage = chat[chat.length - 1].message;
+    const stream = createWriteStream("logs/chats.txt", {flags:'a'});
+    stream.write(`${new Date().toISOString()}\t${ip}\t${latestMessage.replaceAll('\n',' ')}\n`);
+    stream.write(`${new Date().toISOString()}\t${ip}\t${response.replaceAll('\n',' ')}\n`);
+    stream.end();
+};
+
+const logErrors = (err, endpoint, req) => {
+    const stream = createWriteStream("logs/errors.txt", {flags:'a'});
+    stream.write(`${new Date().toISOString()}\t${req.ip}\t${endpoint}\t${err.message}\t${JSON.stringify(req.query)}\t${JSON.stringify(req.params)}\t${JSON.stringify(req.body)}\t${JSON.stringify(req.headers)}\n`);
     stream.end();
 };
 
 module.exports = {
-    log: log
+    logChat: logChat,
+    logErrors: logErrors
 }

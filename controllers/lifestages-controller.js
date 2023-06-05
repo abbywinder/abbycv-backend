@@ -3,41 +3,44 @@ const { generateFetchPipeline, fetchSkillsPipeline } = require('../pipelines/lif
 
 // GET
 
-const getAllLifestages = async (req, res) => {
+const getAllLifestages = async (req, res, next) => {
     try {
         const pipeline = generateFetchPipeline(req.query);
         const data = await Lifestage.aggregate(pipeline).collation({ locale: 'en', strength: 2 });
         if (data.length) return res.status(200).send(data);
         else return res.status(404).send('No data found');
     } catch (err) {
-        return res.status(500).send(err.message);
+        res.locals.endpoint = 'getAllLifestages';
+        return next(err);
     };
 };
 
-const getOneLifestage = async (req, res) => {
+const getOneLifestage = async (req, res, next) => {
     try {
         const data = await Lifestage.findById(req.params.id)
         if (data) return res.status(200).send(data);
         else return res.status(404).send('No data found matching that ID');
     } catch (err) {
-        return res.status(500).send(err.message);
+        res.locals.endpoint = 'getOneLifestage';
+        return next(err);
     };
 };
 
-const getSkills = async (req, res) => {
+const getSkills = async (req, res, next) => {
     try {
         const pipeline = fetchSkillsPipeline();
         const data = await Lifestage.aggregate(pipeline);
         if (data.length) return res.status(200).send(data);
         else return res.status(404).send('No data found');
     } catch (err) {
-        return res.status(500).send(err.message);
+        res.locals.endpoint = 'getSkills';
+        return next(err);
     };
 };
 
 // POST
 
-const createNewLifestage = async (req, res) => {
+const createNewLifestage = async (req, res, next) => {
     try {
         const newLifestage = new Lifestage ({
             date_start: req.body.date_start,
@@ -54,14 +57,15 @@ const createNewLifestage = async (req, res) => {
         const data = await newLifestage.save();
         return res.status(201).send(data);
     } catch (err) {
-        return res.status(500).send(err.message);
+        res.locals.endpoint = 'createNewLifestage';
+        return next(err);
     };  
 };
 
 
 // PUT
 
-const updateLifestage = async (req, res) => {
+const updateLifestage = async (req, res, next) => {
     try {
         const newData = {
             date_start: req.body.date_start,
@@ -79,14 +83,15 @@ const updateLifestage = async (req, res) => {
         if (updatedData) return res.status(200).send(updatedData);
         else return res.status(404).send('Nothing found matching that ID');
     } catch (err) {
-        return res.status(500).send(err.message);
+        res.locals.endpoint = 'updateLifestage';
+        return next(err);
     };
 };
 
 
 // PATCH
 
-const patchById = async (req, res) => {
+const patchById = async (req, res, next) => {
     try {
         let updatedData;
         if (req.body.op === 'replace') updatedData = await Lifestage.updateOne({ _id: req.params.id }, { $set: { [req.body.path]: req.body.value } });
@@ -97,14 +102,15 @@ const patchById = async (req, res) => {
         if (updatedData) return res.status(200).send(updatedData);
         else return res.status(404).send('No match found for that operation');
     } catch (err) {
-        return res.status(500).send(err.message);
+        res.locals.endpoint = 'patchById';
+        return next(err);
     };
 };
 
 
 // DELETE
 
-const deleteByQuery = async (req, res) => {
+const deleteByQuery = async (req, res, next) => {
     try {
         if (Object.keys(req.query).length) {
             const data = await Lifestage.deleteMany(req.query);
@@ -114,17 +120,19 @@ const deleteByQuery = async (req, res) => {
             throw Error('You are not permitted to delete all documents');
         };
     } catch (err) {
-        return res.status(500).send(err.message);
+        res.locals.endpoint = 'deleteByQuery';
+        return next(err);
     };
 };
 
-const deleteById = async (req, res) => {
+const deleteById = async (req, res, next) => {
     try {
         const data = await Lifestage.findByIdAndDelete(req.params.id);
         if (data) return res.status(200).send('Item successfully deleted');
         else return res.status(404).send('No matching item found');
     } catch (err) {
-        return res.status(500).send(err.message);
+        res.locals.endpoint = 'deleteById';
+        return next(err);
     };
 };
 

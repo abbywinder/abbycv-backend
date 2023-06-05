@@ -1,7 +1,7 @@
 const { Configuration, OpenAIApi } = require('openai');
-const { log } = require('../middleware/logger');
+const { logChat } = require('../middleware/logger');
 
-const postToChatGPTGetResponse = async (req, res) => {
+const postToChatGPTGetResponse = async (req, res, next) => {
     try {
         const chatValid = req.body.chat && Array.isArray(req.body.chat) && !req.body.chat.some(e => typeof(e.message) !== 'string');
         if (!chatValid) return res.status(400).send('Bad request.')
@@ -23,12 +23,15 @@ const postToChatGPTGetResponse = async (req, res) => {
         });
             
         const response = completion.data.choices[0].message.content;
-        chatValid && log(req, response);
 
-        if (response) return res.status(200).send({response: response});
-        else return res.status(404).send('No data found');
+        if (response) res.status(200).send({response: response});
+        else res.status(404).send('No data found');
+
+        logChat(req.body.chat, req.ip, response);
+        return;
     } catch (err) {
-        return res.status(500).send('An error has occurred.');
+        res.locals.endpoint = 'postToChatGPTGetResponse';
+        return next(err);
     };
 };
 

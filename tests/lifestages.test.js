@@ -3,6 +3,14 @@ const mongoose = require("mongoose");
 const request = require('supertest');
 const app = require('../app');
 
+jest.mock('fs', () => ({
+    ...jest.requireActual('fs'),
+    createWriteStream: {
+        write: jest.fn(),
+        end: jest.fn()
+    },
+}));
+
 beforeAll(async () => {
     await mongoose.connect(process.env.MONGO_DB_CONNECTION_STR);
 });
