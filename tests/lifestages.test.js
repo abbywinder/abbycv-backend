@@ -5,15 +5,27 @@ const app = require('../app');
 
 jest.mock('fs', () => ({
     ...jest.requireActual('fs'),
-    createWriteStream: {
-        write: jest.fn(),
-        end: jest.fn()
-    },
+    createWriteStream: jest.fn(() => {
+        return {
+          write: jest.fn(),
+          end: jest.fn(),
+        };
+    })
 }));
+
+jest.mock('express-rate-limit', () => {
+    return jest.fn().mockImplementation(() => {
+      return (req, res, next) => {
+        // Do nothing, bypasses 
+        next();
+      };
+    });
+});
 
 beforeAll(async () => {
     await mongoose.connect(process.env.MONGO_DB_CONNECTION_STR);
 });
+
 
 afterAll(async () => {
     await request(app).delete('/api/lifestages/?title=test');

@@ -1,1 +1,0 @@
-// needs to mock write stream here as logger is now a error handling middleware not in controllers

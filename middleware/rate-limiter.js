@@ -9,4 +9,15 @@ const chatGPTlimiter = rateLimit({
 	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 
-module.exports = chatGPTlimiter;
+const rateLimiter = rateLimit({
+	windowMs: 1000,
+	max: 10,
+	message: 'Access Denied',
+	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
+module.exports = {
+	chatGPTlimiter: chatGPTlimiter,
+	rateLimiter: rateLimiter
+};

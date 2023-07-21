@@ -14,6 +14,9 @@
 # logs
 /logs
 
+# security
+/middleware/secure-endpoint.js
+
 # misc
 .DS_Store
 .env

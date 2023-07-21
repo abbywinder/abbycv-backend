@@ -48,6 +48,7 @@ const fetchLifestagesPipeline = query => {
 
     // regex match solution - chosen due to search results updating as typed and dataset being small
     if (query.search) { 
+        if (typeof(query.search) === 'object') query.search = query.search.join(',');
         const fields = ['title','description','hard_skills','soft_skills','achievements','type'];
         query['$or'] = fields.map(field => ({ [field]: { $regex: query.search, $options: 'i' } }));
         delete query['search'];

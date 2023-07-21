@@ -14,7 +14,22 @@ const logErrors = (err, endpoint, req) => {
     stream.end();
 };
 
+const logAccess = (req, res, next) => {
+    const stream = createWriteStream("logs/access.txt", {flags:'a'});
+    stream.write(`${new Date().toISOString()}\t${req.ip}`);
+    stream.end();
+    next();
+};
+
+const logSanitiser = (ip, string) => {
+    const stream = createWriteStream("logs/sanitised.txt", {flags:'a'});
+    stream.write(`${new Date().toISOString()}\t${ip}\t${string}\n`);
+    stream.end();
+}
+
 module.exports = {
     logChat: logChat,
-    logErrors: logErrors
+    logErrors: logErrors,
+    logAccess: logAccess,
+    logSanitiser: logSanitiser
 }

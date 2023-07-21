@@ -1,6 +1,6 @@
 const express = require('express');
 const { postToChatGPTGetResponse } = require('../controllers/chat-controller');
-const chatGPTlimiter = require('../middleware/rate-limiter');
+const { chatGPTlimiter } = require('../middleware/rate-limiter');
 
 const router = express.Router();
 
