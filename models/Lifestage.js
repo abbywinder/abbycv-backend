@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const LifestageSchema = new Schema({
     date_start: {
         type: Date,
-        required: true,
+        required: true, 
         validate: {
             validator: function(v) {
                 return v <= this.date_end;
@@ -14,7 +14,7 @@ const LifestageSchema = new Schema({
     },
     date_end: {
         type: Date,
-        required: true,
+        required: true, 
         validate: {
             validator: function(v) {
                 return v >= this.date_start;
@@ -34,6 +34,13 @@ const LifestageSchema = new Schema({
         type: String
     },
     background_col: {
+        type: String
+    },
+    link: {
+        type: String
+    },
+    images: [String],
+    front_image: {
         type: String
     }
 });

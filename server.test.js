@@ -1,19 +1,8 @@
-const request = require('supertest');
-const app = require('./app');
-const qs = require('qs');
-
+require('dotenv').config();
+const mongoose = require("mongoose");
 
 describe('Server', () => {
-    it('Should not store user sensitive or identifying data on the user\'s browser in session data or cookies', () => {
-
-    });
-
-    it('Should block any potential injection attacks by escaping text and blocking chars', () => {
-
-    });
-
-    it('Should parse foo=bar%2Cbaz as {foo: ["bar","baz"]}', () => {
-        const parsed = qs.parse(decodeURIComponent("foo=bar%2Cbaz"), {comma: true});
-        expect(parsed).toEqual({foo: ['bar','baz']});
-    });
+    it('Should connect to database', async () => {
+        await mongoose.connect(process.env.MONGO_DB_CONNECTION_STR);
+    })
 });

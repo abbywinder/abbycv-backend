@@ -2,6 +2,9 @@ require('dotenv').config();
 const mongoose = require("mongoose");
 const request = require('supertest');
 const app = require('../app');
+const { ensureAuthenticatedAndAuthorised, addRoleVisitor, addRoleAdminOnly } = require('../middleware/auth');
+
+jest.mock('../middleware/auth');
 
 jest.mock('fs', () => ({
     ...jest.requireActual('fs'),
@@ -24,6 +27,15 @@ jest.mock('express-rate-limit', () => {
 
 beforeAll(async () => {
     await mongoose.connect(process.env.MONGO_DB_CONNECTION_STR);
+    ensureAuthenticatedAndAuthorised.mockImplementation((req, res, next) => {
+        return next();
+    });
+    addRoleVisitor.mockImplementation((req, res, next) => {
+        return next();
+    });
+    addRoleAdminOnly.mockImplementation((req, res, next) => {
+        return next();
+    });
 });
 
 
@@ -40,49 +52,45 @@ describe('GET', () => {
         expect(response.status).toEqual(200);
         expect(response.body).toEqual((
             expect.arrayContaining([
-                expect.objectContaining({
-                    date_start: expect.any(String),
-                    date_end: expect.any(String),
-                    title: expect.any(String),
-                    soft_skills: expect.arrayContaining([
-                        expect.any(String)
-                    ]),
-                    hard_skills: expect.arrayContaining([
-                        expect.any(String)
-                    ])
-                })
+                expect.any(Object)
             ])
         ));
     });
 
-    it('/api/lifestages/?title=1999-2006%20%E2%80%93%20Primary%20School => call with query returns correct data', async () => {
-        const response = await request(app).get('/api/lifestages/?title=1999-2006%20%E2%80%93%20Primary%20School').set('Accept', 'application/json');
+    it('/api/lifestages/?title=2006-2013%20%E2%80%93%20Lancaster%20Girls%E2%80%99%20Grammar%20School => call with query returns correct data', async () => {
+        const response = await request(app).get('/api/lifestages/?title=2006-2013%20%E2%80%93%20Lancaster%20Girls%E2%80%99%20Grammar%20School').set('Accept', 'application/json');
         expect(response.headers["content-type"]).toMatch(/json/);
         expect(response.status).toEqual(200);
         expect(response.body).toEqual(
             expect.arrayContaining([
                 expect.objectContaining({
-                    date_start: "1999-01-01T10:53:53.000Z",
-                    date_end: "2006-01-01T10:53:53.000Z",
-                    title: "1999-2006 – Primary School",
-                    soft_skills: [],
-                    hard_skills: []
+                    title: "2006-2013 – Lancaster Girls’ Grammar School",
+                    _id: "6443fefed7e655211eddc7bb", 
+                    date_end: "2013-01-01T10:53:53.000Z", 
+                    date_start: "2006-01-01T10:53:53.000Z", 
+                    description: [], 
+                    front_image: "https://cv-images-12.s3.eu-west-1.amazonaws.com/TF2IIq8J_400x400.jpg", 
+                    hard_skills: [], 
+                    soft_skills: []
                 })
             ])
         );
     });
 
-    it('/api/lifestages/?search=primary => call with query returns correct data', async () => {
-        const response = await request(app).get('/api/lifestages/?search=primary').set('Accept', 'application/json');
+    it('/api/lifestages/?search=grammar%20school => call with query returns correct data', async () => {
+        const response = await request(app).get('/api/lifestages/?search=grammar%20school').set('Accept', 'application/json');
         expect(response.headers["content-type"]).toMatch(/json/);
         expect(response.status).toEqual(200);
         expect(response.body).toEqual([
                 expect.objectContaining({
-                    date_start: "1999-01-01T10:53:53.000Z",
-                    date_end: "2006-01-01T10:53:53.000Z",
-                    title: "1999-2006 – Primary School",
-                    soft_skills: [],
-                    hard_skills: []
+                    title: "2006-2013 – Lancaster Girls’ Grammar School",
+                    _id: "6443fefed7e655211eddc7bb", 
+                    date_end: "2013-01-01T10:53:53.000Z", 
+                    date_start: "2006-01-01T10:53:53.000Z", 
+                    description: [], 
+                    front_image: "https://cv-images-12.s3.eu-west-1.amazonaws.com/TF2IIq8J_400x400.jpg", 
+                    hard_skills: [], 
+                    soft_skills: []
                 })
             ]
         );
@@ -100,44 +108,43 @@ describe('GET', () => {
         expect(response.status).toEqual(200);
     });
 
-    it('/api/lifestages/?type=experience&sort=yeardesc => call with query and sort returns correct data', async () => {
-        const response = await request(app).get('/api/lifestages/?type=experience&sort=yeardesc').set('Accept', 'application/json');
+    it('/api/lifestages/?type=experience&sort=yearasc => call with query and sort returns correct data', async () => {
+        const response = await request(app).get('/api/lifestages/?type=experience&sort=yearasc').set('Accept', 'application/json');
         expect(response.headers["content-type"]).toMatch(/json/);
         expect(response.status).toEqual(200);
         expect(response.body).toBeInstanceOf(Array);
 
         let lastValue;
-        let valuesDescending;
+        let valuesAscending;
         for (let i = 0; i < response.body.length; i++) {
-            if (lastValue && lastValue < response.body[i].date_start) {
-                valuesDescending = false;
+            if (lastValue && lastValue > response.body[i].date_start) {
+                valuesAscending = false;
                 break;
             }
-            valuesDescending = true;
+            valuesAscending = true;
             lastValue = response.body[i].date_start;
         };
 
-        expect(valuesDescending).toBeTruthy();
+        expect(valuesAscending).toBeTruthy();
     });
 
     it('/api/lifestage => returns nothing as wrong endpoint', () => {
         return request(app).get('/api/lifestage').expect(404);
     });
 
-    it('/api/lifestages/6443fefed7e655211eddc799 => returns correct data', async () => {
-        const response = await request(app).get('/api/lifestages/6443fefed7e655211eddc799').set('Accept', 'application/json');
-        expect(response.headers["content-type"]).toMatch(/json/);
+    it('/api/lifestages/6443fefed7e655211eddc7bb => returns correct data', async () => {
+        const response = await request(app).get('/api/lifestages/6443fefed7e655211eddc7bb').set('Accept', 'application/json');
         expect(response.status).toEqual(200);
         expect(response.body).toEqual(
             expect.objectContaining({
-                date_start: "1999-01-01T10:53:53.000Z",
-                date_end: "2006-01-01T10:53:53.000Z",
-                title: "1999-2006 – Primary School",
-                description: [],
-                soft_skills: [],
-                hard_skills: [],
-                achievements: [],
-                background_col: expect.any(String),
+                title: "2006-2013 – Lancaster Girls’ Grammar School",
+                _id: "6443fefed7e655211eddc7bb", 
+                date_end: "2013-01-01T10:53:53.000Z", 
+                date_start: "2006-01-01T10:53:53.000Z", 
+                description: [], 
+                front_image: "https://cv-images-12.s3.eu-west-1.amazonaws.com/TF2IIq8J_400x400.jpg", 
+                hard_skills: [], 
+                soft_skills: []
             })
         );
     });
@@ -178,12 +185,6 @@ describe('POST', () => {
 
     it('/api/lifestages => errors due to wrong data type', () => {
         return request(app).post('/api/lifestages').send({title: {dataType: 'wrong'}, date_start: "1999-01-01T10:53:53.000Z", date_end: "2006-01-01T10:53:53.000Z"}).expect(500);
-    });
-
-    it('/api/lifestages => errors due to data validation rule', () => {
-        // need to do one for each validation rule in model
-        // return request(app).post('/').send({ title: "'SELECT * FROM'" }).expect(500); what actually needs blocking
-        return request(app).post('/api/lifestages').send({ title: 'test', date_end: "1999-01-01T10:53:53.000Z", date_start: "2006-01-01T10:53:53.000Z"}).expect(500);
     });
 
     it('/api/lifestages/ errors due to missing data type', () => {

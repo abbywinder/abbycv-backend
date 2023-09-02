@@ -11,7 +11,7 @@ const chatGPTlimiter = rateLimit({
 
 const rateLimiter = rateLimit({
 	windowMs: 1000,
-	max: 10,
+	max: 50,
 	message: 'Access Denied',
 	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
 	legacyHeaders: false, // Disable the `X-RateLimit-*` headers

@@ -15,7 +15,7 @@
 /logs
 
 # security
-/middleware/secure-endpoint.js
+/middleware/generate_hash_password.js
 
 # misc
 .DS_Store

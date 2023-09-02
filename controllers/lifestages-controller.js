@@ -51,7 +51,10 @@ const createNewLifestage = async (req, res, next) => {
             hard_skills: req.body.hard_skills,
             achievements: req.body.achievements,
             type: req.body.type,
-            background_col: req.body.background_col
+            background_col: req.body.background_col,
+            link: req.body.link,
+            images: req.body.images,
+            front_image: req.body.front_image
         });
     
         const data = await newLifestage.save();
@@ -76,7 +79,10 @@ const updateLifestage = async (req, res, next) => {
             hard_skills: req.body.hard_skills,
             achievements: req.body.achievements,
             type: req.body.type,
-            background_col: req.body.background_col
+            background_col: req.body.background_col,
+            link: req.body.link,
+            images: req.body.images,
+            front_image: req.body.front_image
         };
     
         const updatedData = await Lifestage.findByIdAndUpdate(req.params.id, newData, { new: true });

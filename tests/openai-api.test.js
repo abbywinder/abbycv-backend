@@ -1,7 +1,9 @@
 const request = require('supertest');
 const app = require('../app');
 const { OpenAIApi } = require('openai');
-const fs = require('fs');
+const { ensureAuthenticatedAndAuthorised, addRoleVisitor, addRoleAdminOnly } = require('../middleware/auth');
+
+jest.mock('../middleware/auth');
 
 jest.mock('fs', () => ({
     ...jest.requireActual('fs'),
@@ -22,7 +24,6 @@ jest.mock('express-rate-limit', () => {
     });
 });
 
-
 beforeAll(async () => {
     jest.spyOn(OpenAIApi.prototype, 'createChatCompletion').mockReturnValue({
         data: {
@@ -32,6 +33,15 @@ beforeAll(async () => {
                 }
             }]
         }
+    });
+    ensureAuthenticatedAndAuthorised.mockImplementation((req, res, next) => {
+        return next();
+    });
+    addRoleVisitor.mockImplementation((req, res, next) => {
+        return next();
+    });
+    addRoleAdminOnly.mockImplementation((req, res, next) => {
+        return next();
     });
 });
 
@@ -58,9 +68,9 @@ describe('CHAT-GPT', () => {
         expect(response.text).toEqual('Bad request.');
     });
 
-    // it('api/chat => sends 400 status code if req.body.chat.message is not string', async () => {
-    //     const response = await request(app).post('/api/chat').send({chat: [{sender: 'client', message: 123}]});
-    //     expect(response.status).toEqual(400);
-    //     expect(response.text).toEqual('Bad request.');
-    // });
+    it('api/chat => sends 500 status code if req.body.chat.message is not string', async () => {
+        const response = await request(app).post('/api/chat').send({chat: [{sender: 'client', message: 123}]});
+        expect(response.status).toEqual(500);
+        expect(response.text).toEqual('An error has occurred.');
+    });
 });

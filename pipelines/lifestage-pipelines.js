@@ -15,7 +15,7 @@ const fetchLifestagesPipeline = query => {
         }
     };
 
-    const sort = query.sort;
+    const sort = query.sort && query.sort[0];
     const durationStage = sort && sort.slice(0,8) === 'duration' ? [{
         '$addFields': {
             duration: {
@@ -25,45 +25,25 @@ const fetchLifestagesPipeline = query => {
     }] : [];
     delete query['sort'];
 
-    // // search index solution
-    // if (query.search) { 
-    //     query['$search'] = {
-    //         index: 'default',
-    //         text: {
-    //             query: query.search,
-    //             path: ['title','description','hard_skills','soft_skills','achievements','date_start','date_end','type']
-    //         }
-    //     }
-    //     delete query['search'];
-    // };
-
-    // // text index solution
-    // if (query.search) { 
-    //     query['$text'] = {
-    //         $search: query.search,
-    //         $language: 'en'
-    //     } 
-    //     delete query['search'];
-    // };
+    const matchQuery = [];
 
     // regex match solution - chosen due to search results updating as typed and dataset being small
     if (query.search) { 
         if (typeof(query.search) === 'object') query.search = query.search.join(',');
         const fields = ['title','description','hard_skills','soft_skills','achievements','type'];
-        query['$or'] = fields.map(field => ({ [field]: { $regex: query.search, $options: 'i' } }));
+        matchQuery.push({'$or': fields.map(field => ({ [field]: { $regex: query.search, $options: 'i' } }))});
         delete query['search'];
     };
 
     Object.keys(query).forEach(key => {
         if (Array.isArray(query[key]) && key !== '$or') {
-            query['$or'] = query[key].map(e => ({ [key]: e }));
-            delete query[key];
+            matchQuery.push({['$or']: query[key].map(e => ({ [key]: e }))});
         };
     });
 
     return [
         {
-            '$match': query
+            '$match': matchQuery.length ? { $and: matchQuery } : {}
         }, 
         ...durationStage,
         {
@@ -74,7 +54,10 @@ const fetchLifestagesPipeline = query => {
                 'date_end': 1,
                 'title': 1,
                 'hard_skills': 1,
-                'soft_skills': 1
+                'soft_skills': 1,
+                'link': 1,
+                'description': 1,
+                'front_image': 1
             }
         }
     ];
@@ -106,3 +89,26 @@ module.exports = {
     generateFetchPipeline: fetchLifestagesPipeline,
     fetchSkillsPipeline: fetchSkillsPipeline
 };
+
+
+// other solutions for searching that would work better for a large dataset
+// // search index solution
+    // if (query.search) { 
+    //     query['$search'] = {
+    //         index: 'default',
+    //         text: {
+    //             query: query.search,
+    //             path: ['title','description','hard_skills','soft_skills','achievements','date_start','date_end','type']
+    //         }
+    //     }
+    //     delete query['search'];
+    // };
+
+    // // text index solution
+    // if (query.search) { 
+    //     query['$text'] = {
+    //         $search: query.search,
+    //         $language: 'en'
+    //     } 
+    //     delete query['search'];
+    // };

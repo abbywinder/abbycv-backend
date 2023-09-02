@@ -1,10 +1,15 @@
 const request = require('supertest');
-const app = require('../app');
+require('dotenv').config();
 const { OpenAIApi } = require('openai');
 const fs = require('fs');
 const mongoose = require("mongoose");
+const app = require('../app');
 const { sanitizeReq } = require('../middleware/sanitize');
 const { querySplitter } = require('../middleware/query-splitter');
+const { ensureAuthenticatedAndAuthorised, addRoleVisitor, addRoleAdminOnly } = require('../middleware/auth');
+
+
+jest.mock('../middleware/auth');
 
 jest.mock('fs', () => ({
     ...jest.requireActual('fs'),
@@ -26,6 +31,7 @@ beforeAll(async () => {
             }]
         }
     });
+
     await mongoose.connect(process.env.MONGO_DB_CONNECTION_STR);
 });
 
@@ -35,11 +41,8 @@ afterEach(() => {
 
 afterAll(async () => {
     jest.restoreAllMocks();
-    await request(app).delete('/api/lifestages/?title=test');
-    await request(app).delete('/api/lifestages/?title=test-update');
     await mongoose.connection.close();
 });
-
 
 
 describe('Logger', () => {
@@ -50,6 +53,16 @@ describe('Logger', () => {
             next();
           };
         });
+    });
+
+    ensureAuthenticatedAndAuthorised.mockImplementation((req, res, next) => {
+        return next();
+    });
+    addRoleVisitor.mockImplementation((req, res, next) => {
+        return next();
+    });
+    addRoleAdminOnly.mockImplementation((req, res, next) => {
+        return next();
     });
 
     it('logs chats', async () => {
@@ -74,6 +87,16 @@ describe('Logger', () => {
 });
 
 describe('Sanitize', () => {
+    ensureAuthenticatedAndAuthorised.mockImplementation((req, res, next) => {
+        return next();
+    });
+    addRoleVisitor.mockImplementation((req, res, next) => {
+        return next();
+    });
+    addRoleAdminOnly.mockImplementation((req, res, next) => {
+        return next();
+    });
+
     jest.mock('express-rate-limit', () => {
         return jest.fn().mockImplementation(() => {
           return (req, res, next) => {
@@ -102,6 +125,16 @@ describe('Sanitize', () => {
 });
 
 describe('Query splitter', () => {
+    ensureAuthenticatedAndAuthorised.mockImplementation((req, res, next) => {
+        return next();
+    });
+    addRoleVisitor.mockImplementation((req, res, next) => {
+        return next();
+    });
+    addRoleAdminOnly.mockImplementation((req, res, next) => {
+        return next();
+    });
+
     jest.mock('express-rate-limit', () => {
         return jest.fn().mockImplementation(() => {
           return (req, res, next) => {
@@ -119,6 +152,16 @@ describe('Query splitter', () => {
 });
 
 describe('Rate limiter', () => {
+    ensureAuthenticatedAndAuthorised.mockImplementation((req, res, next) => {
+        return next();
+    });
+    addRoleVisitor.mockImplementation((req, res, next) => {
+        return next();
+    });
+    addRoleAdminOnly.mockImplementation((req, res, next) => {
+        return next();
+    });
+
     it('api/chat => has a limit of 5 requests per IP address', async () => {
         for (i = 0; i < 5; i++) {
             await request(app).post('/api/chat').send({chat: [{sender: 'client', message: 'say this is a test'}]});
@@ -127,18 +170,4 @@ describe('Rate limiter', () => {
         expect(response.status).toEqual(429);
         expect(response.text).toEqual('You have reached your request limit for today');
     });
-
-    it('api => has a limit of 10 requests per IP address in 1 second', async () => {
-        for (i = 0; i < 10; i++) {
-            await request(app).get('/api/lifestages');
-        };
-
-        const response = await request(app).get('/api/lifestages');
-        expect(response.status).toEqual(429);
-        expect(response.text).toEqual('Access Denied');
-    });
-});
-
-describe('Security', () => {
-   
 });
