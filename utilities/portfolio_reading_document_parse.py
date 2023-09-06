@@ -22,8 +22,10 @@ def import_doc(test=False):
                 date = datetime.strptime(fr"{val}T10:53:53.000Z", "%Y-%m-%dT%H:%M:%S.000Z")
                 curr_import['date_start'] = date
                 curr_import['date_end'] = date
+            elif key == 'hard_skills':
+                curr_import[key] = val.split('|')
             else:
-                curr_import[key] = val.split('|') if '|' in val else val
+                curr_import[key] = val
         if len(curr_import.keys()) == 7:
             imports.append(curr_import)
             curr_import = {}
