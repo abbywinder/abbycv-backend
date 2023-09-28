@@ -16,7 +16,7 @@ if (process.env.FIXIE_URL) {
         proxyUsername: fixieAuth[0]
     };
 
-    const fixieData = process.env.FIXIE_SOCKS_HOST.split(new RegExp('[/(:\\/@/]+'));
+    const fixieData = process.env.FIXIE_SOCKS_SOCKS_HOST.split(new RegExp('[/(:\\/@/]+'));
     proxy = {
         proxyUsername: fixieData[0],
         proxyPassword: fixieData[1],
