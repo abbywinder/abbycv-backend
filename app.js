@@ -1,4 +1,5 @@
 //REQUIRES
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -19,7 +20,7 @@ const chatRoute = require('./routes/chat-route');
 const app = express();
 
 const corsOptions = {
-    origin: ['http://localhost:3000'],
+    origin: [process.env.ORIGIN],
     optionsSuccessStatus: 200
 };
 
