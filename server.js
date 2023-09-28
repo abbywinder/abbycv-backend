@@ -5,7 +5,7 @@ const app = require('./app');
 const url = require('url');
 
 // FIXIE CONFIG
-let proxy;
+let proxy = {};
 if (process.env.FIXIE_URL) {
     const fixieUrl = url.parse(process.env.FIXIE_URL);
     const fixieAuth = fixieUrl.auth.split(':');
@@ -27,7 +27,7 @@ mongoose
         useNewUrlParser: true, 
         useUnifiedTopology: true
     },
-    ...(proxy ? proxy : {})
+    ...proxy
 })
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.log(err));
