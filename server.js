@@ -2,20 +2,10 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const app = require('./app');
-const url = require('url');
 
 // FIXIE CONFIG
 let proxy = {};
-if (process.env.FIXIE_URL) {
-    const fixieUrl = url.parse(process.env.FIXIE_URL);
-    const fixieAuth = fixieUrl.auth.split(':');
-    proxy = {
-        proxyHost: fixieUrl.hostname,
-        proxyPassword: fixieAuth[1],
-        proxyPort: fixieUrl.port,
-        proxyUsername: fixieAuth[0]
-    };
-
+if (process.env.FIXIE_SOCKS_SOCKS_HOST) {
     const fixieData = process.env.FIXIE_SOCKS_SOCKS_HOST.split(new RegExp('[/(:\\/@/]+'));
     proxy = {
         proxyUsername: fixieData[0],
