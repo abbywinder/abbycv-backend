@@ -2,29 +2,29 @@ const { createWriteStream } = require('fs');
 
 const logChat = (chat, ip, response) => {
     const latestMessage = chat[chat.length - 1].message;
-    const stream = createWriteStream("logs/chats.txt", {flags:'a'});
-    stream.write(`${new Date().toISOString()}\t${ip}\t${latestMessage.replaceAll('\n',' ')}\n`);
-    stream.write(`${new Date().toISOString()}\t${ip}\t${response.replaceAll('\n',' ')}\n`);
-    stream.end();
+    // const stream = createWriteStream("logs/chats.txt", {flags:'a'});
+    // stream.write(`${new Date().toISOString()}\t${ip}\t${latestMessage.replaceAll('\n',' ')}\n`);
+    // stream.write(`${new Date().toISOString()}\t${ip}\t${response.replaceAll('\n',' ')}\n`);
+    // stream.end();
 };
 
 const logErrors = (err, endpoint, req) => {
-    const stream = createWriteStream("logs/errors.txt", {flags:'a'});
-    stream.write(`${new Date().toISOString()}\t${req.ip}\t${endpoint}\t${err.message}\t${JSON.stringify(req.query)}\t${JSON.stringify(req.params)}\t${JSON.stringify(req.body)}\t${JSON.stringify(req.headers)}\n`);
-    stream.end();
+    // const stream = createWriteStream("logs/errors.txt", {flags:'a'});
+    // stream.write(`${new Date().toISOString()}\t${req.ip}\t${endpoint}\t${err.message}\t${JSON.stringify(req.query)}\t${JSON.stringify(req.params)}\t${JSON.stringify(req.body)}\t${JSON.stringify(req.headers)}\n`);
+    // stream.end();
 };
 
 const logAccess = (req, res, next) => {
-    const stream = createWriteStream("logs/access.txt", {flags:'a'});
-    stream.write(`${new Date().toISOString()}\t${req.ip}`);
-    stream.end();
+    // const stream = createWriteStream("logs/access.txt", {flags:'a'});
+    // stream.write(`${new Date().toISOString()}\t${req.ip}`);
+    // stream.end();
     next();
 };
 
 const logSanitiser = (ip, string) => {
-    const stream = createWriteStream("logs/sanitised.txt", {flags:'a'});
-    stream.write(`${new Date().toISOString()}\t${ip}\t${string}\n`);
-    stream.end();
+    // const stream = createWriteStream("logs/sanitised.txt", {flags:'a'});
+    // stream.write(`${new Date().toISOString()}\t${ip}\t${string}\n`);
+    // stream.end();
 }
 
 module.exports = {

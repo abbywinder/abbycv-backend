@@ -48,7 +48,7 @@ app.use('/api/chat', chatRoute);
 
 // error handler
 app.use((err, req, res, next) => {
-    // logErrors(err, res.locals.endpoint ? res.locals.endpoint : 'entry', req);
+    logErrors(err, res.locals.endpoint ? res.locals.endpoint : 'entry', req);
     return res.status(500).send('An error has occurred.');
 });
 
