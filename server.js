@@ -15,6 +15,14 @@ if (process.env.FIXIE_URL) {
         proxyPort: fixieUrl.port,
         proxyUsername: fixieAuth[0]
     };
+
+    const fixieData = process.env.FIXIE_SOCKS_HOST.split(new RegExp('[/(:\\/@/]+'));
+    proxy = {
+        proxyUsername: fixieData[0],
+        proxyPassword: fixieData[1],
+        proxyHost: fixieData[2],
+        proxyPort: fixieData[3]
+    }
 };
 
 //DB CONFIG
