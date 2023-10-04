@@ -3,6 +3,8 @@ const request = require('supertest');
 const mongoose = require("mongoose");
 const app = require('../app');
 
+jest.mock('../controllers/logs-controller');
+
 beforeAll(async () => {
     await mongoose.connect(process.env.MONGO_DB_CONNECTION_STR);
 });

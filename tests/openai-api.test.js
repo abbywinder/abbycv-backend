@@ -4,6 +4,7 @@ const { OpenAIApi } = require('openai');
 const { ensureAuthenticatedAndAuthorised, addRoleVisitor, addRoleAdminOnly } = require('../middleware/auth');
 
 jest.mock('../middleware/auth');
+jest.mock('../controllers/logs-controller');
 
 jest.mock('fs', () => ({
     ...jest.requireActual('fs'),

@@ -7,9 +7,10 @@ const app = require('../app');
 const { sanitizeReq } = require('../middleware/sanitize');
 const { querySplitter } = require('../middleware/query-splitter');
 const { ensureAuthenticatedAndAuthorised, addRoleVisitor, addRoleAdminOnly } = require('../middleware/auth');
-
+const { createNewLog } = require('../controllers/logs-controller');
 
 jest.mock('../middleware/auth');
+jest.mock('../controllers/logs-controller');
 
 jest.mock('fs', () => ({
     ...jest.requireActual('fs'),
@@ -67,22 +68,22 @@ describe('Logger', () => {
 
     it('logs chats', async () => {
         await request(app).post('/api/chat').send({chat: [{sender: 'client', message: 'say this is a test'}]});
-        expect(fs.createWriteStream).toHaveBeenCalledWith("logs/chats.txt",{"flags": "a"});
+        expect(createNewLog).toHaveBeenCalled();
     });
 
     it('logs errors', async () => {
         await request(app).get('/api/lifestages/1');
-        expect(fs.createWriteStream).toHaveBeenLastCalledWith("logs/errors.txt",{"flags": "a"});
+        expect(createNewLog).toHaveBeenCalled();
     });
 
     it('logs access', async () => {
         await request(app).get('/api/lifestages');
-        expect(fs.createWriteStream).toHaveBeenNthCalledWith(1,"logs/access.txt",{"flags": "a"});
+        expect(createNewLog).toHaveBeenCalled();
     });
 
     it('logs sanitised inputs', async () => {
         await request(app).get('/api/lifestages');
-        expect(fs.createWriteStream).toHaveBeenCalledWith("logs/sanitised.txt",{"flags": "a"});
+        expect(createNewLog).toHaveBeenCalled();
     });
 });
 
