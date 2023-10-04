@@ -1,4 +1,3 @@
-const { createWriteStream } = require('fs');
 const { createNewLog } = require('../controllers/logs-controller');
 
 const logChat = (chat, ip, response) => {
@@ -33,7 +32,7 @@ const logAccess = (req, res, next) => {
 
 const logSanitiser = (ip, string) => {
     return createNewLog({
-        message: JSON.stringify(string),
+        message: string,
         type: 'sanitise',
         date: new Date().toISOString(),
         ip: ip
